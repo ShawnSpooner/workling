@@ -13,7 +13,7 @@ module Workling
 
   class ConfigurationError < WorklingError
     def initialize
-      super File.exist?(File.join(RAILS_ROOT, 'config', 'starling.yml')) ? 
+      super File.exist?(File.join(Rails.root.to_s, 'config', 'starling.yml')) ? 
         "config/starling.yml has been depracated. rename your config file to config/workling.yml then try again!" :
         "config/workling.yml could not be loaded. check out README.markdown to see what this file should contain. "
     end
@@ -32,7 +32,7 @@ module Workling
   #   Workling::Remote.dispatcher = Workling::Remote::Runners::StarlingRunner.new
   #
   def self.default_runner
-    if RAILS_ENV == "test"
+    if Rails.env.to_s == "test"
       Workling::Remote::Runners::NotRemoteRunner.new
     elsif starling_installed?
       Workling::Remote::Runners::StarlingRunner.new
@@ -122,8 +122,8 @@ module Workling
   #
   def self.config
     begin
-      config_path = File.join(RAILS_ROOT, 'config', 'workling.yml')
-      @@config ||=  YAML.load_file(config_path)[RAILS_ENV || 'development'].symbolize_keys
+      config_path = File.join(Rails.root.to_s, 'config', 'workling.yml')
+      @@config ||=  YAML.load_file(config_path)[Rails.env.to_s || 'development'].symbolize_keys
       @@config[:memcache_options].symbolize_keys! if @@config[:memcache_options]
       @@config 
     rescue
@@ -137,7 +137,7 @@ module Workling
   #  logger.error. it's easy to miss these log calls while developing, though. 
   #
   mattr_accessor :raise_exceptions
-  @@raise_exceptions = (RAILS_ENV == "test" || RAILS_ENV == "development")
+  @@raise_exceptions = (Rails.env.to_s == "test" || Rails.env.to_s == "development")
   
   def self.raise_exceptions?
     @@raise_exceptions
